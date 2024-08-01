@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    <form>
+        <label for="first_name">first name:</label>
+        <br>
+        <input type="text" name="first_name">
+
+        <br><br>
+
+        <label for="last_name">last name:</label>
+        <br>
+        <input type="text" name="last_name">
+
+        <br><br>
+
+        <label for="age">age:</label>
+        <br>
+        <input type="text" name="age">
+
+        <br><br>
+
+        <label for="address">address:</label>
+        <br>
+        <input type="text" name="address">
+
+        <br><br>
+
+        <button type="submit">Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            // Initialize a Socket.io connection
+            const socket = io();
+
+            $('form').on('submit', (e) => {
+                e.preventDefault();
+                sendData();
+            })
+
+            function fetchData() {
+                $.ajax({
+                    url: 'http://localhost/socket_io_php/api/receive.php',  // Replace with your server URL
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        // Send to server
+                        socket.emit('data', response);
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+
+            function sendData() {
+                const formData = {
+                    first_name: $('input[name=first_name]').val(),
+                    last_name: $('input[name=last_name]').val(),
+                    age: $('input[name=age]').val(),
+                    address: $('input[name=address]').val()
+                };
+
+                $.ajax({
+                    url: 'http://localhost/socket_io_php/api/send.php',  // Replace with your server URL
+                    type: 'POST',
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (response) {
+                        console.log('Success:', response);
+                        $('input[name=first_name]').val('');
+                        $('input[name=last_name]').val('');
+                        $('input[name=age]').val('');
+                        $('input[name=address]').val('');
+
+                        fetchData();
+                    },
+
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+
+            }
+        });
+    </script>
+</body>
+
+</html>

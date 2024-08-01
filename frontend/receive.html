@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receive Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+
+<body>
+    <h1 class="text-center my-5 font-bold text-[2rem]">Receive Data</h1>
+    <div class="m-">
+        <table class="border-collapse border border-slate-500 w-[100%]">
+            <thead>
+                <tr>
+                    <th class="border border-slate-600 ...">First Name</th>
+                    <th class="border border-slate-600 ...">Last Name</th>
+                    <th class="border border-slate-600 ...">Age</th>
+                    <th class="border border-slate-600 ...">Address</th>
+                </tr>
+            </thead>
+            <tbody id="table_body">
+                <tr>
+                    <td class="border border-slate-700 ...">Indiana</td>
+                    <td class="border border-slate-700 ...">Indianapolis</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            fetchData();
+
+            const socket = io();
+            // Listen to data 
+            socket.on('data', (msg) => {
+
+                console.log(msg);
+                
+                // Map() 
+                const dataHtml = msg.map((singleData) => {
+                    const { first_name, last_name, age, address } = singleData;
+                    return `<tr>
+                                <td class="border border-slate-700 ...">${first_name}</td>
+                                <td class="border border-slate-700 ...">${last_name}</td>
+                                <td class="border border-slate-700 ...">${age}</td>
+                                <td class="border border-slate-700 ...">${address}</td>
+                                </tr>`;
+                }).join("");
+
+                $('#table_body').html(dataHtml);
+
+            });
+
+            function fetchData() {
+                $.ajax({
+                    url: 'http://localhost/socket_io_php/api/receive.php',  // Replace with your server URL
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        // Send to server
+                        const dataHtml = response.map((singleData) => {
+                            const { first_name, last_name, age, address } = singleData;
+                            return `<tr>
+                                <td class="border border-slate-700 ...">${first_name}</td>
+                                <td class="border border-slate-700 ...">${last_name}</td>
+                                <td class="border border-slate-700 ...">${age}</td>
+                                <td class="border border-slate-700 ...">${address}</td>
+                                </tr>`;
+                        }).join("");
+
+                        $('#table_body').html(dataHtml);
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>
